@@ -152,30 +152,17 @@ void print_row(Row* row) {
     printf("(%d, %s, %s)\n", row->id, row->username, row->email);
 }
 
-// ExecuteResult execute_insert(Statement* statement, Table* table) {
-//     if (table->num_rows >= TABLE_MAX_ROWS)
-//     {
-//         return EXECUTE_TABLE_FULL;
-//     }
-    
-//     Row* row_to_insert = &(statement->row_to_insert);
-//     serialize_row(row_to_insert, row_slot(table, table->num_rows));
-//     table->num_rows += 1;
-    
-//     return EXECUTE_SUCCESS;
-// }
-
 ExecuteResult execute_insert(Statement* statement, Table* table) {
-  if (table->num_rows >= TABLE_MAX_ROWS) {
-    return EXECUTE_TABLE_FULL;
-  }
+    if (table->num_rows >= TABLE_MAX_ROWS) {
+        return EXECUTE_TABLE_FULL;
+    }
+    
+    Row* row_to_insert = &(statement->row_to_insert);
 
-  Row* row_to_insert = &(statement->row_to_insert);
-
-  serialize_row(row_to_insert, row_slot(table, table->num_rows));
-  table->num_rows += 1;
-
-  return EXECUTE_SUCCESS;
+    serialize_row(row_to_insert, row_slot(table, table->num_rows));
+    table->num_rows += 1;
+    
+    return EXECUTE_SUCCESS;
 }
 
 ExecuteResult execute_select(Statement* statement, Table* table) {
