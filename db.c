@@ -54,8 +54,8 @@ typedef struct {
 } Table;
 
 void* row_slot(Table* table, uint32_t row_num) {
-    uint32_t page_num = row_num / PAGE_SIZE;
-    void* page = table->pages[page_num];
+    uint32_t page_num = row_num / ROWS_PER_PAGE;
+    void *page = table->pages[page_num];
     if (page == NULL)
     {
         // Allocate memory only when we try to access page
@@ -63,7 +63,7 @@ void* row_slot(Table* table, uint32_t row_num) {
     }
     
     uint32_t row_offset = row_num % ROWS_PER_PAGE;
-    uint32_t byte_offset = row_offset % ROW_SIZE;
+    uint32_t byte_offset = row_offset * ROW_SIZE;
 
     return page + byte_offset;
 }
@@ -126,14 +126,14 @@ MetaCommandResult do_meta_command(InputBuffer* input_buffer) {
 }
 
 PrepareResult prepare_statement(InputBuffer* input_buffer, Statement* statement) {
-    if (strncmp(input_buffer->buffer, "insert", 6) == 0)
-    {
-        statement->type = STATEMENT_INSERT;
-        return PREPARE_SUCCESS;
-    }
     if (strcmp(input_buffer->buffer, "select") == 0)
     {
         statement->type = STATEMENT_SELECT;
+        return PREPARE_SUCCESS;
+    }
+    if (strncmp(input_buffer->buffer, "insert", 6) == 0)
+    {
+        statement->type = STATEMENT_INSERT;
         int args_assigned = sscanf(input_buffer->buffer, "insert %d %s %s", &(statement->row_to_insert.id),
         statement->row_to_insert.username, statement->row_to_insert.email);
 
@@ -153,12 +153,12 @@ void print_row(Row* row) {
 }
 
 ExecuteResult execute_insert(Statement* statement, Table* table) {
-    if (table->num_rows >= TABLE_MAX_ROWS)
-    {
+    if (table->num_rows >= TABLE_MAX_ROWS) {
         return EXECUTE_TABLE_FULL;
     }
     
     Row* row_to_insert = &(statement->row_to_insert);
+
     serialize_row(row_to_insert, row_slot(table, table->num_rows));
     table->num_rows += 1;
     
@@ -247,7 +247,5 @@ int main(int argc, char* argv[])
                 printf("Error: Table full.\n");
                 break;
         }
-
-        printf("Executed.\n");
     }
 }
