@@ -1,5 +1,6 @@
 # Build a Simple Database
-[Full tutirial](https://cstack.github.io/db_tutorial/)
+Just to follow [Full tutorial](https://cstack.github.io/db_tutorial/) to build a simple sqlite like DB.
+
 [Code reference](https://github.com/cstack/db_tutorial)
 
 ## Prerequisites
