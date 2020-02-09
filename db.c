@@ -153,15 +153,6 @@ void close_input_buffer(InputBuffer* input_buffer) {
     free(input_buffer);
 }
 
-MetaCommandResult do_meta_command(InputBuffer* input_buffer, Table* table) {
-  if (strcmp(input_buffer->buffer, ".exit") == 0) {
-    db_close(table);
-    exit(EXIT_SUCCESS);
-  } else {
-    return META_COMMAND_UNRECOGNIZED_COMMAND;
-  }
-}
-
 PrepareResult prepare_insert(InputBuffer* input_buffer, Statement* statement) {
     statement->type = STATEMENT_INSERT;
     strtok(input_buffer->buffer, " ");
@@ -353,6 +344,15 @@ void db_close(Table* table) {
     free(table);
 }
 
+MetaCommandResult do_meta_command(InputBuffer* input_buffer, Table* table) {
+  if (strcmp(input_buffer->buffer, ".exit") == 0) {
+    db_close(table);
+    exit(EXIT_SUCCESS);
+  } else {
+    return META_COMMAND_UNRECOGNIZED_COMMAND;
+  }
+}
+
 int main(int argc, char* argv[])
 {
     if (argc < 2)
@@ -363,7 +363,7 @@ int main(int argc, char* argv[])
     
     char* file_name = argv[1];
     Table* table = db_open(file_name);
-    
+
     InputBuffer* input_buffer = new_input_buffer();
     while (true)
     {
