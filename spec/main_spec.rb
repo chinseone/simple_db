@@ -57,8 +57,8 @@ describe 'database' do
         "db > ",
       ])
     end
-  
-=begin
+
+=begin  
     it 'prints error message if strings are too long' do
       long_username = "a"*33
       long_email = "a"*256
