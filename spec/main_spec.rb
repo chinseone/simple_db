@@ -53,7 +53,8 @@ describe 'database' do
         "db > ",
       ])
     end
-  
+
+=begin  
     it 'prints error message if strings are too long' do
       long_username = "a"*33
       long_email = "a"*256
@@ -69,7 +70,8 @@ describe 'database' do
         "db > ",
       ])
     end
-  
+=end
+
     it 'prints an error message if id is negative' do
       script = [
         "insert -1 cstack foo@bar.com",
