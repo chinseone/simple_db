@@ -1,4 +1,6 @@
-# Build a Simple Database
+# Build a Simple Database 
+![C/C++ CI](https://github.com/chinseone/simple_db/workflows/C/C++%20CI/badge.svg?branch=master)
+
 Just to follow [Full tutorial](https://cstack.github.io/db_tutorial/) to build a simple sqlite like DB.
 
 [Code reference](https://github.com/cstack/db_tutorial)
