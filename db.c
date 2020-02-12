@@ -31,6 +31,35 @@ const uint32_t EMAIL_SIZE = size_of_attribute(Row, email);
 #define EMAIL_OFFSET  (USERNAME_OFFSET + USERNAME_SIZE)
 #define ROW_SIZE (ID_SIZE + USERNAME_SIZE + EMAIL_SIZE)
 
+/*
+ * Common Node Header Layout
+ */
+#define NODE_TYPE_SIZE sizeof(uint8_t)
+#define NODE_TYPE_OFFSET 0
+#define IS_ROOT_SIZE sizeof(uint8_t)
+#define IS_ROOT_OFFSET NODE_TYPE_SIZE
+#define PARENT_POINTER_SIZE sizeof(uint32_t)
+#define PARENT_POINTER_OFFSET (IS_ROOT_OFFSET + IS_ROOT_SIZE)
+#define COMMON_NODE_HEADER_SIZE (NODE_TYPE_SIZE + IS_ROOT_SIZE + PARENT_POINTER_SIZE)
+
+/*
+ * Leaf Node Header Layout
+ */
+#define LEAF_NODE_NUM_CELLS_SIZE sizeof(uint32_t)
+#define LEAF_NODE_NUM_CELLS_OFFSET COMMON_NODE_HEADER_SIZE
+#define LEAF_NODE_HEADER_SIZE (COMMON_NODE_HEADER_SIZE + LEAF_NODE_NUM_CELLS_SIZE)
+
+/*
+ * Leaf Node Body Layout
+ */
+#define LEAF_NODE_KEY_SIZE sizeof(uint32_t)
+#define LEAF_NODE_KEY_OFFSET 0
+#define LEAF_NODE_VALUE_SIZE ROW_SIZE
+#define LEAF_NODE_VALUE_OFFSET (LEAF_NODE_KEY_OFFSET + LEAF_NODE_KEY_SIZE)
+#define LEAF_NODE_CELL_SIZE  (LEAF_NODE_KEY_SIZE + LEAF_NODE_VALUE_SIZE)
+#define LEAF_NODE_SPACE_FOR_CELLS  (PAGE_SIZE - LEAF_NODE_HEADER_SIZE)
+#define LEAF_NODE_MAX_CELLS (LEAF_NODE_SPACE_FOR_CELLS / LEAF_NODE_CELL_SIZE)
+
 void serialize_row(Row* source, void* destination) {
     memcpy(destination + ID_OFFSET, &(source->id), ID_SIZE);
     memcpy(destination + USERNAME_OFFSET, &(source->username), USERNAME_SIZE);
@@ -147,6 +176,8 @@ typedef enum { PREPARE_SUCCESS, PREPARE_NEGATIVE_ID, PREPARE_UNRECOGNIZED_STATEM
 typedef enum { STATEMENT_INSERT, STATEMENT_SELECT } StatementType;
 
 typedef enum { EXECUTE_SUCCESS, EXECUTE_TABLE_FULL } ExecuteResult;
+
+typedef enum { NODE_INTERNAL, NODE_LEAF } NodeType;
 
 typedef struct {
   StatementType type;
@@ -388,6 +419,25 @@ MetaCommandResult do_meta_command(InputBuffer* input_buffer, Table* table) {
     return META_COMMAND_UNRECOGNIZED_COMMAND;
   }
 }
+
+// B tree implementation
+uint32_t* leaf_node_num_cells(void* node) {
+  return node + LEAF_NODE_NUM_CELLS_OFFSET;
+}
+
+void* leaf_node_cell(void* node, uint32_t cell_num) {
+  return node + LEAF_NODE_HEADER_SIZE + cell_num * LEAF_NODE_CELL_SIZE;
+}
+
+uint32_t* leaf_node_key(void* node, uint32_t cell_num) {
+  return leaf_node_cell(node, cell_num);
+}
+
+void* leaf_node_value(void* node, uint32_t cell_num) {
+  return leaf_node_cell(node, cell_num) + LEAF_NODE_KEY_SIZE;
+}
+
+void initialize_leaf_node(void* node) { *leaf_node_num_cells(node) = 0; }
 
 int main(int argc, char* argv[])
 {
